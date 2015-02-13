@@ -11,6 +11,8 @@ app = Flask(__name__)
 app.config['DEBUG'] = True # Enable this only while testing!
 access_token=""
 
+# web_url = r'http://mwcu.pythonanywhere.com'\
+web_url = r'http://localhost:5000'
 
 # Three main pages
 @app.route('/')
@@ -40,29 +42,28 @@ def results():
 def login():
     api_key = '78hfrhpe6d2v7h'
     random_state = 'STATEDCEEFWF45453sdffef424'
-    callback_url = r'http://mwcu.pythonanywhere.com/linkedin'
+    callback_url = r'%s/linkedin' % web_url
     payload = {
         'response_type': 'code',
         'client_id': api_key,
-        'scope': 'r_fullprofile r_emailaddress r_network'
+        'scope': 'r_fullprofile r_emailaddress r_network',
         'state': random_state,
         'redirect_uri': callback_url
     }
     base_url = "https://www.linkedin.com/uas/oauth2/authorization"
-    response = requests.post(base_url, params=payload)
-    return response.text
-    #return redirect(url2, 302)
+    response = requests.get(base_url, params=payload)
+    return redirect(response.url)
 
 @app.route('/linkedin')
 def getToke():
     authenticationCode = request.args['code']
     global access_token
     url = "https://www.linkedin.com/uas/oauth2/accessToken"
-    urhaha = "http://mwcu.pythonanywhere.com/linkedin"
+    callback_url = r'%s/linkedin' % web_url
     para = {
         'grant_type': 'authorization_code',
         'code': authenticationCode,
-        'redirect_uri': urhaha,
+        'redirect_uri': callback_url,
         'client_id': '78hfrhpe6d2v7h',
         'client_secret': 'mLT3bcX7i4xYZYeU'
     }
