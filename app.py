@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 access_token = ""
 
-# web_url = r'http://mwcu.pythonanywhere.com'
+# web_url = r'https://mwcu.pythonanywhere.com'
 web_url = r'http://localhost:5000'
 
 
