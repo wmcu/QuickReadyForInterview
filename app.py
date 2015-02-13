@@ -1,27 +1,32 @@
-from flask import Flask, jsonify, render_template, request,redirect,session,url_for
+from flask import Flask, jsonify, render_template, request, redirect, session, url_for
 import requests
 import nytime
 import xml.etree.ElementTree as ET
+from hashlib import sha1
+from random import random
 
 
 # Create an Flask app object.  We'll use this to create the routes.
 app = Flask(__name__)
 
 # Allow Flask to autoreload when we make changes to `app.py`.
-app.config['DEBUG'] = True # Enable this only while testing!
-access_token=""
+app.config['DEBUG'] = True
+access_token = ""
 
-# web_url = r'http://mwcu.pythonanywhere.com'\
+# web_url = r'http://mwcu.pythonanywhere.com'
 web_url = r'http://localhost:5000'
+
 
 # Three main pages
 @app.route('/')
 def index():
     return render_template('login.html')
 
+
 @app.route('/search', methods=["GET", "POST"])
 def search():
     return render_template('search.html')
+
 
 @app.route('/results', methods=["GET", "POST"])
 def results():
@@ -41,7 +46,7 @@ def results():
 @app.route('/login')
 def login():
     api_key = '78hfrhpe6d2v7h'
-    random_state = 'STATEDCEEFWF45453sdffef424'
+    random_state = sha1('%s' % random()).hexdigest()[:16]
     callback_url = r'%s/linkedin' % web_url
     payload = {
         'response_type': 'code',
@@ -54,11 +59,12 @@ def login():
     response = requests.get(base_url, params=payload)
     return redirect(response.url)
 
+
 @app.route('/linkedin')
 def getToke():
     authenticationCode = request.args['code']
     global access_token
-    url = "https://www.linkedin.com/uas/oauth2/accessToken"
+    base_url = "https://www.linkedin.com/uas/oauth2/accessToken"
     callback_url = r'%s/linkedin' % web_url
     para = {
         'grant_type': 'authorization_code',
@@ -67,12 +73,12 @@ def getToke():
         'client_id': '78hfrhpe6d2v7h',
         'client_secret': 'mLT3bcX7i4xYZYeU'
     }
-    response = requests.post(url, params=para)
+    response = requests.post(base_url, params=para)
     response_dict = response.json()
     access_token = response_dict['access_token']
     print access_token
     print url_for('static', filename='style.css')
-    return redirect(url_for('search'),302)
+    return redirect(url_for('search'))
 
 
 # Error Handler
@@ -80,9 +86,11 @@ def getToke():
 def not_found(error):
     return render_template('404.html'), 404
 
+
 @app.errorhandler(500)
 def internal_server_error(error):
     return render_template('500.html'), 500
+
 
 @app.route('/info/<company_name>')
 def get_posts(company_name):
@@ -115,19 +123,20 @@ def process_glassdoor_response(api_dict, company_name):
     for employer in employers_list:
         if company_name.lower() in employer.get("name").lower():
             filtered_employer = {"name":employer.get("name"),"website":employer.get("website"),
-            "industry":employer.get("industry"),"logo":employer.get("squareLogo"),"number_of_ratings":employer.get("numberOfRatings"),
-            "overall_rating":employer.get("overallRating"),"rating_description":employer.get("ratingDescription"),
-            "culture_and_values_rating":employer.get("cultureAndValuesRating"),
-            "senior_leadership_rating":employer.get("seniorLeadershipRating"),
-            "compensation_and_benefits_rating":employer.get("compensationAndBenefitsRating"),
-            "career_opportunities_rating":employer.get("careerOpportunitiesRating"),
-            "work_life_balance_rating":employer.get("workLifeBalanceRating"),
-            "recommend_to_friend_rating":employer.get("recommendToFriendRating")}
+                                 "industry":employer.get("industry"),"logo":employer.get("squareLogo"),"number_of_ratings":employer.get("numberOfRatings"),
+                                 "overall_rating":employer.get("overallRating"),"rating_description":employer.get("ratingDescription"),
+                                 "culture_and_values_rating":employer.get("cultureAndValuesRating"),
+                                 "senior_leadership_rating":employer.get("seniorLeadershipRating"),
+                                 "compensation_and_benefits_rating":employer.get("compensationAndBenefitsRating"),
+                                 "career_opportunities_rating":employer.get("careerOpportunitiesRating"),
+                                 "work_life_balance_rating":employer.get("workLifeBalanceRating"),
+                                 "recommend_to_friend_rating":employer.get("recommendToFriendRating")}
             if employer.get("ceo"):
                 filtered_employer["ceo"] = employer.get("ceo")
             filtered_dict["companies"].append(filtered_employer)
             return filtered_dict
     return filtered_dict
+
 
 # Backend API
 def glassdoor(keyword):
@@ -137,6 +146,7 @@ def glassdoor(keyword):
     glassdoor_response_dict = process_glassdoor_response(glassdoor_response_dict, keyword)
     return glassdoor_response_dict
 
+
 @app.route('/searchCompany/<company_name>')
 def goCompany(company_name):
     global access_token
@@ -145,10 +155,11 @@ def goCompany(company_name):
     authenticatedGetUrl = "https://api.linkedin.com/v1/company-search"
     print "----------------------------->"
     print access_token
-    passin = {'oauth2_access_token' : access_token,
-    'keywords':company_name
+    passin = {
+        'oauth2_access_token': access_token,
+        'keywords': company_name
     }
-    response2 = requests.get(authenticatedGetUrl,params=passin)
+    response2 = requests.get(authenticatedGetUrl, params=passin)
     root = ET.fromstring(response2.text.encode('ascii', 'ignore'))
     if root is None:
         print "root is none"
@@ -161,44 +172,39 @@ def goCompany(company_name):
             print "companyTag is none"
         else:
             companyID = companyTag.find('id').text
-            companySearchByID = "https://api.linkedin.com/v1/companies/"+companyID
+            companySearchByID = "https://api.linkedin.com/v1/companies/" + companyID
             companySearchByID = companySearchByID + ":(name,description)"
-            passin3 = {'oauth2_access_token' : access_token
-            }
+            passin3 = {'oauth2_access_token': access_token}
 
-            response3 = requests.get(companySearchByID,params=passin3)
+            response3 = requests.get(companySearchByID, params=passin3)
             root = ET.fromstring(response3.text.encode('ascii', 'ignore'))
 
             companyName = root.find('name').text
             companyDescription = root.find('description').text
 
-    jsonOutput = {'name' : companyName, 'description' :companyDescription}
-    #print "below is the first name"
-    #print companyName
-    #print "below is the description"
-    #print companyDescription
+    jsonOutput = {'name': companyName, 'description': companyDescription}
     return jsonOutput
-    #print companyDescription
+
 
 def facebook(keyword):
-    #Returns the list of updates of a company.
-    TOKEN ='575731909230644|ZuJwTeYLANGBOsZFWPczcx8JDZo'
+    # Returns the list of updates of a company.
+    TOKEN = '575731909230644|ZuJwTeYLANGBOsZFWPczcx8JDZo'
     parameters = {'access_token': TOKEN}
-    response = requests.get('https://graph.facebook.com/'+ keyword + '/feed', params=parameters)
+    response = requests.get('https://graph.facebook.com/' + keyword + '/feed', params=parameters)
     response_dict = response.json()
     info_collection = []
-    ret = {'data' : info_collection}
-    if response_dict.has_key('error') :
+    ret = {'data': info_collection}
+    if 'error' in response_dict:
         return ret
     for item in response_dict['data']:
         abstract = {}
-        if (item.has_key('status_type') and item.has_key('name') and item.has_key('message') and item['status_type'] == "shared_story") :
+        if ('status_type' in item and 'name' in item and 'message' in item and item['status_type'] == "shared_story"):
             abstract['link'] = item['link']
             abstract['message'] = item['message']
             abstract['name'] = item['name']
             abstract['picture'] = item['picture']
             abstract['pub_date'] = item['updated_time'][:10]
-            info_collection.append(abstract);
+            info_collection.append(abstract)
     return ret
 
 
