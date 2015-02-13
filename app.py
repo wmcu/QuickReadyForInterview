@@ -38,27 +38,37 @@ def results():
 # Login related pages
 @app.route('/login')
 def login():
-    url2 = "https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=77xb7liae3hzk1&scope=r_fullprofile%20r_emailaddress%20r_network&state=STATEDCEEFWF45453sdffef424&redirect_uri=http://localhost:5000/linkedin"
-    return redirect(url2,302)
+    api_key = '78hfrhpe6d2v7h'
+    random_state = 'STATEDCEEFWF45453sdffef424'
+    callback_url = r'http://mwcu.pythonanywhere.com/linkedin'
+    payload = {
+        'response_type': 'code',
+        'client_id': api_key,
+        'scope': 'r_fullprofile r_emailaddress r_network'
+        'state': random_state,
+        'redirect_uri': callback_url
+    }
+    base_url = "https://www.linkedin.com/uas/oauth2/authorization"
+    response = requests.post(base_url, params=payload)
+    return response.text
+    #return redirect(url2, 302)
 
 @app.route('/linkedin')
 def getToke():
     authenticationCode = request.args['code']
     global access_token
-
     url = "https://www.linkedin.com/uas/oauth2/accessToken"
-    urhaha= "http://localhost:5000/linkedin"
+    urhaha = "http://mwcu.pythonanywhere.com/linkedin"
     para = {
-        'grant_type':'authorization_code',
-        'code':authenticationCode,
-        'redirect_uri':urhaha,
-        'client_id':'77xb7liae3hzk1',
-        'client_secret':'8phXc3HeTwdeamsv'
+        'grant_type': 'authorization_code',
+        'code': authenticationCode,
+        'redirect_uri': urhaha,
+        'client_id': '78hfrhpe6d2v7h',
+        'client_secret': 'mLT3bcX7i4xYZYeU'
     }
-    response = requests.post(url,params=para)
-    response_dict=response.json()
+    response = requests.post(url, params=para)
+    response_dict = response.json()
     access_token = response_dict['access_token']
-    print "this is  jinggggggggggg wei"
     print access_token
     print url_for('static', filename='style.css')
     return redirect(url_for('search'),302)
