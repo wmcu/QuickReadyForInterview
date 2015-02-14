@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Results | QuickReadyForInterview</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/1-col-portfolio.css') }}" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/search">Quick Ready For Interview</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#" id="General">General</a>
+                    </li>
+                    <li>
+                        <a href="#" id="News">News</a>
+                    </li>
+                    <li>
+                        <a href="#" id="Social">Social</a>
+                    </li>
+                </ul>
+                <form class="navbar-form pull-right" role="search" action="/results" method="POST">
+            <div class="input-group">
+               <input type="text" class="form-control" name="company-name" placeholder="Search" required/>
+               <div class="input-group-btn">
+                  <button type="submit" class="btn btn-default">
+                    <span class="glyphicon glyphicon-search"></span>
+                  </button>
+               </div>
+            </div>
+         </form>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+        <!-- Page Content -->
+    <div class="container well">
+        <!-- Page Heading -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Results
+                    <small>...</small>
+                </h1>
+            </div>
+        </div>
+
+    <div id="fragment-1">
+    <div class= "container">
+    <div id="glassdoor"  class="col-md-4">
+    {% if api_data["glassdoor"]["companies"] %}
+    <ul>
+    {% for company in api_data["glassdoor"]["companies"] %}
+    {% if company.logo %}
+        <img src="{{ company.logo }}" alt="Logo" />
+        {% endif %}
+        <p>Website: <a href="http://{{ company.website }}">{{ company.website }}</a></p>
+        <p>Industry: {{ company.industry }}</p>
+        {% if company.ceo %}
+        <p>{{ company.ceo["title"] }}: {{ company.ceo["name"] }}</p>
+        <p>Approval Rate: {{ company.ceo["pctApprove"] }}</p>
+        {% endif %}
+
+    {% endfor %}
+    </ul>
+    {% else %}
+    <p>There were no results found on Glassdoor</p>
+    {% endif %}
+    <a href='http://www.glassdoor.com/index.htm'>powered by <img src='http://www.glassdoor.com/static/img/api/glassdoor_logo_80.png' title='Job Search' /></a>
+</div>
+<div id="glassdoor2"  class="col-md-4">
+    {% if api_data["glassdoor"]["companies"] %}
+    <ul>
+    {% for company in api_data["glassdoor"]["companies"] %}
+        <h4>Company Rating :</h4>
+        <p>Number of Ratings: {{ company.number_of_ratings }}</p>
+        <p>Overall Rating: {{ company.overall_rating }} {{ company.rating_description }}</p>
+        <p>Culture and Values Rating: {{ company.culture_and_values_rating }}</p>
+        <p>Senior Leadership Rating: {{ company.senior_leadership_rating }}</p>
+        <p>Compensation and Benefits Rating: {{ company.compensation_and_benefits_rating }}</p>
+        <p>Career Opportunities Rating: {{ company.career_opportunities_rating }}</p>
+        <p>Work Life Balance Rating: {{ company.work_life_balance_rating }}</p>
+        <p>Recommend to Friend Rating: {{ company.recommend_to_friend_rating }}</p>
+
+    {% endfor %}
+    </ul>
+    {% else %}
+    <p>There were no results found on Glassdoor</p>
+    {% endif %}
+</div>
+<div id="linkedin" class="col-md-4">
+    <p  width = "500px" id="yihong">
+
+    {%  if  api_data['linkedin']['name']  %}
+        <h4>Company description :</h4>
+        {{api_data['linkedin']['description']}}
+    </p>
+    {% else %}
+      </p> There is no result found</p>
+    {% endif %}
+    <a href='http://www.linkedin.com'> powered by Linkedin </a>
+</div>
+
+</div>
+</div>
+
+
+
+        <!-- /.row -->
+    <div id="fragment-2">
+        <div id="nytimes">
+        {% if api_data['nytimes']['data']|count > 0 %}
+            {% for item in api_data['nytimes']['data'] %}
+                <div class="row">
+                <div class="col-md-2">
+                    <a href="#">
+                        <img class="img-responsive"
+                        {% if item['picture'] != '' %}
+                            src="{{ 'http://www.nytimes.com/' + item['picture'] }}"
+                        {% else %}
+                            src="{{ url_for('static', filename='img/img-not-found.png') }}"
+                        {% endif %}
+                            alt="News Image" width="250" height="250">
+                    </a>
+                </div>
+                <div class="col-md-10">
+                    <h3>{{ item['headline'] }}</h3>
+                    <h4>{{ item['pub_date'] }}</h4>
+                    <p>{{ item['message'] }}</p>
+                    <a class="btn btn-primary" href="{{ item['link'] }}">
+                        View Details
+                        <span class="glyphicon glyphicon-chevron-right"></span>
+                    </a>
+                </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>There is no result found<p>
+        {% endif %}
+    </br>
+        </div>
+    </div>
+    <div id="fragment-3">
+        {% if api_data['facebook']['data']|count > 0 %}
+            {% for item in api_data["facebook"]["data"] %}
+                <div class="row">
+                    <div class="col-md-2">
+                        <a href= {{ item["link"] }}>
+                            <img class="img-responsive" src={{ item["picture"] }} alt="">
+                        </a>
+                    </div>
+                    <div class="col-md-10">
+                        <h3>{{ item["name"] }}</h3>
+                        <h4>{{ item['pub_date'] }}</h4>
+                        <p>{{ item["message"] }}</p>
+                        <a class="btn btn-primary" href= {{ item["link"] }}>View Details<span class="glyphicon glyphicon-chevron-right"></span></a>
+                    </div>
+                </br>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>There is no result found<p>
+        {% endif %}
+    </div>
+
+    <!-- /.container -->
+</div>
+
+    <footer>
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <p>Copyright &copy; Quick Ready For Interview 2015</p>
+            </div>
+        </div>
+        <!-- /.row -->
+    </footer>
+
+    <!-- jQuery -->
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-ui.min.js') }}"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script>
+    $( "#General" ).click(function() {
+        $("#fragment-1").css('display', 'block');
+        $("#fragment-2").css('display', 'none');
+        $("#fragment-3").css('display', 'none');
+    });
+    $( "#News" ).click(function() {
+        $("#fragment-1").css('display', 'none');
+        $("#fragment-2").css('display', 'block');
+        $("#fragment-3").css('display', 'none');
+    });
+    $( "#Social" ).click(function() {
+        $("#fragment-1").css('display', 'none');
+        $("#fragment-2").css('display', 'none');
+        $("#fragment-3").css('display', 'block');
+    });
+    $(function () {
+        $("#fragment-1").css('display', 'block');
+        $("#fragment-2").css('display', 'none');
+        $("#fragment-3").css('display', 'none');
+    });
+    </script>
+</body>
+
+</html>
