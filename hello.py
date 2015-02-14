@@ -10,7 +10,7 @@ from random import random
 app = Flask(__name__)
 
 # Allow Flask to autoreload when we make changes to `app.py`.
-app.config['DEBUG'] = True
+#app.config['DEBUG'] = True
 access_token = ""
 
 web_url = r'https://quick-ready-for-interview.herokuapp.com'
