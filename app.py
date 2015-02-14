@@ -13,8 +13,8 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 access_token = ""
 
-# web_url = r'https://quick-ready-for-interview.herokuapp.com'
-web_url = r'http://localhost:5000'
+web_url = r'https://quick-ready-for-interview.herokuapp.com'
+# web_url = r'http://localhost:5000'
 
 
 # Three main pages
