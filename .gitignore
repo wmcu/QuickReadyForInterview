@@ -1,2 +1,5 @@
 venv
+Vagrantfile
+bootstrap.sh
+.vagrant/*
 *.pyc
