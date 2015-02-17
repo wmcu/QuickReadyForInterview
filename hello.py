@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request, redirect, session, url_for
 import requests
+import urllib
 import nytime
 import xml.etree.ElementTree as ET
 from hashlib import sha1
@@ -56,8 +57,8 @@ def login():
         'redirect_uri': callback_url
     }
     base_url = "https://www.linkedin.com/uas/oauth2/authorization"
-    response = requests.get(base_url, params=payload)
-    return redirect(response.url)
+    url = base_url + '?' + urllib.urlencode(payload)
+    return redirect(url)
 
 
 @app.route('/linkedin')
